@@ -1,4 +1,5 @@
-from ast import If
+import mysql.connector
+from mysql.connector import errorcode
 from encodings import search_function
 import pytesseract
 import cv2
@@ -127,7 +128,7 @@ def date_veiculo(numero, plates):
     if numero in plates:
         agora = datetime.datetime.now()
         dataSaida = agora.strftime("%d/%m/%Y")
-        print(dataSaida)
+        print(dataSaida)# 
         horaSaida = agora.strftime("%H : %M")
         plates.remove(numero)
         print('saida')
@@ -143,14 +144,34 @@ def date_veiculo(numero, plates):
         return horaEntrada
 
 if __name__ == "__main__":
+   
+    try:
+        db_connection = mysql.connector.connect(host='localhost', user='root', password='2bF83Jz@7', database='projetoCompGrafica')
+        print("Banco de Dados Conectado!")
+    except mysql.connector.Error as error:
+        if error.errno == errorcode.ER_BAD_DB_ERROR:
+            print("Banco de Dados Nao existe")
+        elif error.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Seu Nome ou Senha Esta Errado")
+        else:
+            print(error)
+    
+    cursor = db_connection.cursor()
+ 
+    sql = ("SELECT idCarros FROM carros")
+    cursor.execute(sql)
+    for (idCarros) in cursor:
+        print(idCarros)
+    print("\n")
+
     source = "resource/video720p.mkv"
 
     authorized_plate = ['FUN-0972', 'BRA2E19']
     search_place = ['FUN-0972', 'OJJ3984']
-    plates = ['FUN-0972', 'OJJ3984']
+    plates = ['FUN-0972']
 
-    #buscaRetanguloPlaca(source)
-    #preProcessamentoRoi()
+    buscaRetanguloPlaca(source)
+    preProcessamentoRoi()
     
     numero = reconhecimentoOCR()
     numero = numero.strip('\n')   
